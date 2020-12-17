@@ -1,0 +1,12 @@
+pycbrf
+openexchangerates
+aiogram
+aiohttp-autoreload
+aiohttp-healthcheck
+aiomysql
+aioredis
+apscheduler
+loguru
+redis
+tortoise-orm
+python-dotenv
