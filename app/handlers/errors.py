@@ -1,30 +1,29 @@
-from aiogram import types
-from loguru import logger
-from app import config
-from app.misc import dp, bot
-from exeptions import CurChangeError
+import logging
+
+import ujson
+from aiogram import Dispatcher, Bot
+from aiogram.types import Update
+from functools import partial
+
+from aiogram.utils.markdown import html_decoration as hd
+
+logger = logging.getLogger(__name__)
 
 
-@dp.errors_handler()
-async def errors_handler(update: types.Update, exception: Exception):
-    exception_: Exception
-
-    try:
-        raise exception
-    except Exception as e:
-        type_e = e.__class__.__name__
-        await bot.send_message(
-            config.LOG_CHAT_ID,
-            f"Получено исключение {type_e} {exception}\n"
-            f"во время обработки апдейта {update}")
-        logger.exception(
-            "Cause exception {type_e} {e} in update {update}",
-            type_e=type_e, e=exception, update=update
-        )
-    return True
+async def handle(update: Update, exception: Exception, log_chat_id: int, bot: Bot):
+    logger.exception(
+        "Cause unexpected exception %s, by processing %s",
+        exception.__class__.__name__, update.dict(exclude_none=True)
+    )
+    if not log_chat_id:
+        return
+    await bot.send_message(
+        log_chat_id,
+        f"Получено исключение {exception.__class__.__name__}\n"
+        f"во время обработки апдейта {hd.quote(ujson.dumps(update.dict(exclude_none=True), default=str))}\n"
+        f"{hd.quote(exception.args[0])}"
+    )
 
 
-async def notify_user_about_exception(e: CurChangeError):
-    if e.chat_id is None:
-        return await bot.send_message(e.user_id, e.notify_user)
-    return await bot.send_message(e.chat_id, e.notify_user)
+def setup_errors(dp: Dispatcher, log_chat_id: int):
+    dp.errors.register(partial(handle, log_chat_id=log_chat_id))

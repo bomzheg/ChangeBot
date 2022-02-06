@@ -1,9 +1,13 @@
 from aiogram import Dispatcher
-from loguru import logger
-from app.middlewares.acl import ACLMiddleware
+from sqlalchemy.orm import sessionmaker
+
+from app.middlewares.config_middleware import ConfigMiddleware
+from app.middlewares.data_load_middleware import LoadDataMiddleware
+from app.middlewares.db_middleware import DBMiddleware
+from app.models.config.main import BotConfig
 
 
-def setup(dispatcher: Dispatcher):
-    logger.info("Configure middlewares...")
-    dispatcher.middleware.setup(ACLMiddleware())
-
+def setup_middlewares(dp: Dispatcher, pool: sessionmaker, bot_config: BotConfig):
+    dp.message.middleware(ConfigMiddleware(bot_config))
+    dp.message.middleware(DBMiddleware(pool))
+    dp.message.middleware(LoadDataMiddleware())
