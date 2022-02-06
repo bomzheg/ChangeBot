@@ -1,14 +1,18 @@
 import logging
+import re
 
 from aiogram import Dispatcher
+from aiogram.dispatcher.filters.command import CommandStart
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove, ContentType
 
 from aiogram.utils.markdown import html_decoration as hd
 
+from app import texts
 from app.dao.holder import HolderDao
 from app.models import dto
 from app.services.chat import update_chat_id
+from app.utils.exch_rates import ConvertedPrices
 
 logger = logging.getLogger(__name__)
 
@@ -43,14 +47,10 @@ async def chat_migrate(message: Message, chat: dto.Chat, dao: HolderDao):
     logger.info(f"Migrate chat from %s to %s", message.chat.id, new_id)
 
 
-
-
-
-@dp.message_handler(CommandStart(re.compile(r'^from-[\d\w_]*to-[\w_]*')))
-async def cmd_start_deep_link(message: types.Message, chat: Chat):
+async def cmd_start_deep_link(message: Message, chat: dto.Chat):
     """
         deep linking распознают строки вида:
-        http://t.me/curChangeBot?start=from-1200RUB_1500RUBto-EUR_USD
+        https://t.me/curChangeBot?start=from-1200RUB_1500RUBto-EUR_USD
     """
     words = message.text.split()
     if len(words) <= 1:
@@ -76,24 +76,24 @@ async def cmd_start_deep_link(message: types.Message, chat: Chat):
         return await cmd_start(message)
 
 
-@dp.message_handler(CommandStart())
-async def cmd_start(message: types.Message):
-    await bot.send_message(message.chat.id, config.START_MSG)
+async def cmd_start(message: Message):
+    await message.answer(texts.START_MSG)
 
 
-@dp.message_handler(CommandHelp())
-async def cmd_help(message: types.Message):
-    logger.info("User {user} read help in {chat}", user=message.from_user.id, chat=message.chat.id)
-    await message.reply(config.HELP_MSG)
+async def cmd_help(message: Message):
+    logger.info("User % read help in %", message.from_user.id, message.chat.id)
+    await message.reply(texts.HELP_MSG)
 
 
-@dp.message_handler(commands=["about"])
-async def cmd_about(message: types.Message):
-    await message.reply(config.ABOUT_MSG)
-
+async def cmd_about(message: Message):
+    await message.reply(texts.ABOUT_MSG)
 
 
 def setup_base(dp: Dispatcher):
+    dp.message.register(cmd_start_deep_link, CommandStart(re.compile(r'^from-[\d\w_]*to-[\w_]*')))
+    dp.message.register(cmd_start, CommandStart())
+    dp.message.register(cmd_help, commands="help")
+    dp.message.register(cmd_about, commands="about")
     dp.message.register(chat_id, commands=["idchat", "chat_id", "id"], commands_prefix="/!")
     dp.message.register(cancel_state, commands="cancel")
     dp.message.register(chat_migrate, content_types=ContentType.MIGRATE_TO_CHAT_ID)
