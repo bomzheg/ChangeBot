@@ -32,11 +32,11 @@ def load_bot_config(dct: dict) -> BotConfig:
         token=dct["token"],
         log_chat=dct["log_chat"],
         superusers=dct["superusers"],
-        beauty=dct["beauty"]
+        beauty=dct.get("beauty", list()),
     )
 
 
 def load_rates(dct: dict) -> RatesConfig:
     return RatesConfig(
-        oer_token=dct["oer_token"]
+        oer_token=dct["oer_token"],
     )
