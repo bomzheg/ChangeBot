@@ -26,14 +26,14 @@ async def inline_convert(inline_query: InlineQuery, bot: Bot, oer: RatesOpenExch
         ]
     else:
         rez = list()
-        for iso_code, desc in VALUTA:
-            rez = await line.get_plain_str_with_new_rates(iso_code)
+        for iso_code, desc in VALUTA.items():
+            current = await line.get_plain_str_with_new_rates(iso_code)
             rez.append(
                 InlineQueryResultArticle(
-                    id='1', title=desc,
-                    description=f"Сконвертировано: {rez}",
+                    id=iso_code, title=desc,
+                    description=f"Сконвертировано: {current}",
                     input_message_content=InputTextMessageContent(
-                        message_text=rez)
+                        message_text=current)
                 )
             )
     await bot.answer_inline_query(inline_query.id, results=rez)

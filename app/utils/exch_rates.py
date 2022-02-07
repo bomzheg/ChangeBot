@@ -153,13 +153,15 @@ class RatesOpenExchange(Rates):
         self.r = ExchangeOER(api_key=self.api_key)
 
     async def get_updated_date(self):
-        return datetime.datetime.fromtimestamp((await self.r.latest())['timestamp']).isoformat()
+        latest_ = await self.r.latest()
+        return datetime.datetime.fromtimestamp(int(latest_['timestamp'])).isoformat()
 
     async def get_rate(self, char_val: str):
         if char_val == 'RUB':
             return 1
         else:
-            return (await self.r.latest())['RUB'] / (await self.r.latest())[char_val]
+            latest = (await self.r.latest())["rates"]
+            return float(latest['RUB'] / latest[char_val])
 
     def get_source_rates(self):
         return 'OpenExchangeRates'
@@ -298,7 +300,7 @@ class ConvertedPrices:
             else:
                 break
         if rate_val_char is None:
-            raise KeyError
+            raise KeyError("")
         return rate_val_char, r.source_rates
 
     async def _new_price(self, price, old_val_char, new_val_char):

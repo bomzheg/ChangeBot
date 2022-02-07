@@ -9,7 +9,9 @@ from app.utils.exch_rates import RatesOpenExchange
 
 
 def setup_middlewares(dp: Dispatcher, pool: sessionmaker, bot_config: BotConfig, oer: RatesOpenExchange):
-    dp.message.middleware(ContextMiddleware(bot_config, oer))
+    context_middleware = ContextMiddleware(bot_config, oer)
+    dp.message.middleware(context_middleware)
+    dp.inline_query.middleware(context_middleware)
     dp.message.middleware(DBMiddleware(pool))
     dp.message.middleware(LoadDataMiddleware())
     dp.message.middleware()
