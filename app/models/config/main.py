@@ -10,6 +10,7 @@ class Config:
     paths: Paths
     db: DBConfig
     bot: BotConfig
+    rates: RatesConfig
 
     @property
     def app_dir(self) -> Path:
@@ -46,3 +47,9 @@ class BotConfig:
     token: str
     log_chat: int
     superusers: list[int]
+    beauty: list[int]
+
+
+@dataclass
+class RatesConfig:
+    oer_token: str

@@ -1,19 +1,18 @@
+"""
+Danger! very old ugly code
+"""
+import logging
 import re
 import datetime
 from abc import ABC, abstractmethod
 
-import config
-from app.config import DEFAULT_SRC
 from pycbrf import ExchangeRates as ExchangeCBRF
-# import quandl
-from openexchangerates.exchange import Exchange as ExchangeOER
+from openexchangerates.client import OpenExchangeRatesClient as ExchangeOER
 
 
-# Общая идея ООП здесь: абстрактный класс Rates - описывает поведение - как конвертировать,
-# наследники - добывают курсы валют и только дают уже определённым методам конкретные цифры
-# ConvertedPrice - при инициализиации нарезает внутрь себя с сохранением позиций строку и ее части содержащие цены
-# внешний пользователь просто создаёт объект строки с ценами и общается с её функциями, Rates - содержится в описании
-# класса ConvertedPrice
+logger = logging.getLogger(__name__)
+
+
 # TODO разобраться с регулярками здесь. нужно чтобы "2 евроспорт" не считалось а "*,2.8бакса?" считалось
 # таким образом надо думать о том, что разрешены знаки препинания после ключевых символов или слов, но не буквы
 digits_re = r"\d+[.,]?\d*"
@@ -109,8 +108,7 @@ class Rates(ABC):
     }
 
     def __init__(self):
-        print(f'init {self.get_source_rates()}')
-        return
+        logger.info(f'init {self.get_source_rates()}')
 
     @abstractmethod
     def get_rate(self, val_char):
@@ -152,16 +150,16 @@ class RatesOpenExchange(Rates):
     def __init__(self, api_key: str):
         super(RatesOpenExchange, self).__init__()
         self.api_key = api_key
-        self.r = ExchangeOER(app_id=self.api_key)
+        self.r = ExchangeOER(api_key=self.api_key)
 
-    def get_updated_date(self):
-        return datetime.datetime.fromtimestamp(self.r.latest()['timestamp']).isoformat()
+    async def get_updated_date(self):
+        return datetime.datetime.fromtimestamp((await self.r.latest())['timestamp']).isoformat()
 
-    def get_rate(self, char_val: str):
+    async def get_rate(self, char_val: str):
         if char_val == 'RUB':
             return 1
         else:
-            return self.r.rates()['RUB'] / self.r.rates()[char_val]
+            return (await self.r.latest())['RUB'] / (await self.r.latest())[char_val]
 
     def get_source_rates(self):
         return 'OpenExchangeRates'
@@ -176,24 +174,13 @@ class PartString:
         self.val_char_part = val_char_part
 
 
-rates_cb = RatesCBRF()
-rates_oer = RatesOpenExchange(config.OPEN_EXCHANGE_RATES_API_KEY)
-
-
 class ConvertedPrices:
     rates = list()
 
-    def __init__(self, line="", *, rates_source=DEFAULT_SRC):
+    def __init__(self, line="", *, rates: RatesOpenExchange):
         self.used_src = set()
-        if rates_source == 'cbrf':
-            self.rates = [rates_cb, rates_oer]
-            self.r = self.rates[0]
-        elif rates_source == 'oer':
-            self.rates = [rates_oer, rates_cb]
-            self.r = self.rates[0]
-        else:
-            self.rates = [rates_cb, rates_oer]
-            self.r = self.rates[0]
+        self.rates = [rates]
+        self.r = rates
 
         def add_prices(pattern, line, val_char):
             i = 0
@@ -230,7 +217,7 @@ class ConvertedPrices:
         return rez
 
     def __iter__(self):
-        return (iter(self.list_parts))
+        return iter(self.list_parts)
 
     def __setitem__(self, key, value):
         self.list_parts[key] = value
@@ -241,11 +228,11 @@ class ConvertedPrices:
     def get_count_prices(self):
         return len(self.list_parts)
 
-    def get_str_with_new_rates(self, val_char_to):
-        new_conv_price = ConvertedPrices()
+    async def get_str_with_new_rates(self, val_char_to):
+        new_conv_price = ConvertedPrices(rates=self.r)
         new_conv_price.end_str = self.end_str
         for parts in self:
-            new_price, next_src = self._new_price(
+            new_price, next_src = await self._new_price(
                 parts.float_part,
                 parts.val_char_part,
                 val_char_to
@@ -260,14 +247,11 @@ class ConvertedPrices:
             )
         return new_conv_price
 
-    def get_plain_str_with_new_rates(self, val_char_to):
-        # rez = self.get_str_with_new_rates(val_char_to)
-        # rez.end_str += "\nВсе конвертации по курсам: " + ', '.join(self.used_src)
-        # return str(rez)
+    async def get_plain_str_with_new_rates(self, val_char_to):
         new_conv_price = ""
         for parts in self:
             new_conv_price += parts.str_part
-            new_price, next_src = self._new_price(
+            new_price, next_src = await self._new_price(
                 parts.float_part, parts.val_char_part, val_char_to
             )
             self.used_src.update(next_src)
@@ -277,12 +261,12 @@ class ConvertedPrices:
         new_conv_price += self.end_str + "\nВсе конвертации по курсам: " + ' '.join(self.used_src)
         return new_conv_price
 
-    def get_only_equals_rates(self, list_val_char_to):
+    async def get_only_equals_rates(self, list_val_char_to):
         rez = ""
-        mySet = set()
+        my_set = set()
         for parts in self:
-            if str(parts.float_part) + parts.val_char_part not in mySet:
-                mySet.add(str(parts.float_part) + parts.val_char_part)
+            if str(parts.float_part) + parts.val_char_part not in my_set:
+                my_set.add(str(parts.float_part) + parts.val_char_part)
                 if parts.float_part == float('inf'):
                     rez += "Кто тут измеряет стоимость вселенной в " + \
                            self.r.val_chars[parts.val_char_part] + "?"
@@ -291,7 +275,7 @@ class ConvertedPrices:
                     for val_char_to in list_val_char_to:
                         if parts.val_char_part != val_char_to:
                             next_rez += " ≈ "
-                            new_price, next_src = self._new_price(parts.float_part, parts.val_char_part, val_char_to)
+                            new_price, next_src = await self._new_price(parts.float_part, parts.val_char_part, val_char_to)
                             self.used_src.update(next_src)
                             next_rez += self.price_to_str(
                                 new_price,
@@ -304,23 +288,22 @@ class ConvertedPrices:
             rez += "Все конвертации по курсам: " + ', '.join(self.used_src)
         return rez
 
-    def found_rate(self, val_char):
+    async def found_rate(self, val_char):
+        rate_val_char = None
         for r in self.rates:
             try:
-                rate_val_char = r.get_rate(val_char)
+                rate_val_char = await r.get_rate(val_char)
             except KeyError:
                 pass
             else:
                 break
-        else:
-            if rate_val_char is None:
-                raise KeyError
+        if rate_val_char is None:
+            raise KeyError
         return rate_val_char, r.source_rates
 
-    def _new_price(self, price, old_val_char, new_val_char):
-        rez = None
-        rate_old_val_char, old_src = self.found_rate(old_val_char)
-        rate_new_val_char, new_src = self.found_rate(new_val_char)
+    async def _new_price(self, price, old_val_char, new_val_char):
+        rate_old_val_char, old_src = await self.found_rate(old_val_char)
+        rate_new_val_char, new_src = await self.found_rate(new_val_char)
         rez = price * rate_old_val_char / rate_new_val_char
         return rez, {old_src, new_src}
 
@@ -334,12 +317,11 @@ class ConvertedPrices:
     def validate_vals(self, words: list):
         err_list = list()
         to_append = set()
-        if len(words) > 0:
-            for word in words:
-                if word in self.r.val_chars:
-                    to_append.add(word)
-                else:
-                    err_list.append(word)
-            return to_append, err_list
-        else:
-            raise ValueError
+        if len(words) == 0:
+            raise ValueError("no vals is present")
+        for word in words:
+            if word in self.r.val_chars:
+                to_append.add(word)
+            else:
+                err_list.append(word)
+        return to_append, err_list
