@@ -1,4 +1,4 @@
-from aiogram import Bot
+from aiogram import Bot, Dispatcher
 from aiogram.types import InlineQuery, InlineQueryResultArticle, InputTextMessageContent
 
 from app.utils.exch_rates import ConvertedPrices, RatesOpenExchange
@@ -37,3 +37,7 @@ async def inline_convert(inline_query: InlineQuery, bot: Bot, oer: RatesOpenExch
                 )
             )
     await bot.answer_inline_query(inline_query.id, results=rez)
+
+
+def setup_inline(dp: Dispatcher):
+    dp.inline_query.register(inline_convert)

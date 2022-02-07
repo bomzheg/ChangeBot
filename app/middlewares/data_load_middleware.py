@@ -21,7 +21,7 @@ class LoadDataMiddleware(BaseMiddleware):
         holder_dao: HolderDao = data["dao"]
         data["user"] = await save_user(data, holder_dao)
         data["chat"] = await save_chat(data, holder_dao)
-        data["vals_settings"] = await load_settings(data["chat"], holder_dao.settings)
+        data["settings"] = await load_settings(data["chat"], holder_dao.settings)
         result = await handler(event, data)
         return result
 

@@ -8,7 +8,7 @@ from app.models.db.base import Base
 class Settings(Base):
     __tablename__ = "settings"
     __mapper_args__ = {"eager_defaults": True}
-    chat_id = Column(BigInteger, ForeignKey("Chat.tg_id"), primary_key=True, autoincrement=False)
+    chat_id = Column(BigInteger, ForeignKey("chats.tg_id"), primary_key=True, autoincrement=False)
     """telegram chat id. 
         it is legacy relation key for db backward compatibility"""
     vals = Column(Text)

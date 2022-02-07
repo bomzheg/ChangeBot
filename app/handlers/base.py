@@ -78,7 +78,7 @@ async def cmd_start(message: Message):
 
 
 async def cmd_help(message: Message):
-    logger.info("User % read help in %", message.from_user.id, message.chat.id)
+    logger.info("User %s read help in %s", message.from_user.id, message.chat.id)
     await message.reply(texts.HELP_MSG)
 
 

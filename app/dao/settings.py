@@ -30,9 +30,9 @@ class SettingsDao(BaseDAO[Settings]):
         except NoResultFound:
             settings = Settings(
                 chat_id=chat_tg_id,
-                vals=DEFAULT_VALS,
                 src=DEFAULT_SRC,
             )
+            settings.set_vals(DEFAULT_VALS)
             self.save(settings)
             await self.flush(settings)
             return settings

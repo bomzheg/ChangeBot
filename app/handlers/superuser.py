@@ -1,6 +1,8 @@
+import asyncio
 import logging
 import threading
 import time
+import os
 
 from aiogram import Dispatcher, Bot
 from aiogram.exceptions import TelegramAPIError
@@ -68,6 +70,10 @@ async def generate_logchat_link(message: Message, bot: Bot, config: BotConfig):
 
 
 async def get_date(message: Message, oer: RatesOpenExchange):
+    asyncio.create_task(date_task(message, oer))
+
+
+async def date_task(message: Message, oer: RatesOpenExchange):
     await message.answer(await oer.get_updated_date(), disable_notification=True)
 
 

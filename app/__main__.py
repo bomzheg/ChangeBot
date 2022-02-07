@@ -1,8 +1,10 @@
+import asyncio
 import logging
 from pathlib import Path
 
 from aiogram import Dispatcher, Bot
 from aiogram.dispatcher.filters import ContentTypesFilter
+from sqlalchemy.orm import close_all_sessions
 
 from app.config import load_config
 from app.handlers import setup_handlers
@@ -13,7 +15,7 @@ from app.utils.exch_rates import RatesOpenExchange
 logger = logging.getLogger(__name__)
 
 
-def main():
+async def main():
     app_dir = Path(__file__).parent.parent
     config = load_config(app_dir)
 
@@ -26,8 +28,12 @@ def main():
     bot = Bot(config.bot.token, parse_mode="HTML")
 
     logger.info("started")
-    dp.run_polling(bot)
+    try:
+        await dp.start_polling(bot)
+    finally:
+        await oer.r.close()
+        close_all_sessions()
 
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())

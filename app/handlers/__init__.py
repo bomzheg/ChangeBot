@@ -4,6 +4,8 @@ from aiogram import Dispatcher
 
 from app.handlers.base import setup_base
 from app.handlers.errors import setup_errors
+from app.handlers.inline_convert import setup_inline
+from app.handlers.message_convert import setup_message_convert
 from app.handlers.superuser import setup_superuser
 from app.models.config.main import BotConfig
 
@@ -14,4 +16,6 @@ def setup_handlers(dp: Dispatcher, bot_config: BotConfig):
     setup_errors(dp, bot_config.log_chat)
     setup_base(dp)
     setup_superuser(dp, bot_config)
+    setup_message_convert(dp)
+    setup_inline(dp)
     logger.debug("handlers configured successfully")
