@@ -1,5 +1,5 @@
 pycbrf
-openexchangerates
+python-openexchangerates
 aiogram
 aiohttp-autoreload
 aiohttp-healthcheck
