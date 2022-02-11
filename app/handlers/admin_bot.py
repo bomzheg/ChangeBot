@@ -6,19 +6,7 @@ from loguru import logger
 
 from app import config
 from app.misc import bot, dp
-from app.utils.log import StreamToLogger
 from app.utils.send_text_file import send_log_files
-
-logger_ = StreamToLogger(logger)
-
-
-@dp.message_handler(lambda message: message.chat.id == config.ADMIN_ID, commands='cancel_jobs')
-async def cancel_jobs(message: types.Message):
-    from app.services.apscheduller import scheduler
-    logger.warning("removing all jobs")
-    scheduler.print_jobs(out=logger_)
-    scheduler.remove_all_jobs()
-    await message.reply("Данные удалены")
 
 
 @dp.async_task

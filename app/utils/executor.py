@@ -8,7 +8,7 @@ from loguru import logger
 from app import config
 from app.misc import dp
 from app.models import db
-from app.services import apscheduller, healthcheck
+from app.services import healthcheck
 from app.utils.send_text_file import send_log_files
 
 runner = Executor(dp)
@@ -33,7 +33,6 @@ async def on_startup_notify(dispatcher: Dispatcher):
 def setup():
     logger.info("Configure executor...")
     db.setup(runner)
-    apscheduller.setup(runner)
     healthcheck.setup(runner)
     runner.on_startup(on_startup_webhook, webhook=True, polling=False)
     runner.on_startup(on_startup_notify)

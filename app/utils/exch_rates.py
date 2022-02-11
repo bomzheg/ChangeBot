@@ -2,7 +2,7 @@ import re
 import datetime
 from abc import ABC, abstractmethod
 
-import config
+from app import config
 from app.config import DEFAULT_SRC
 from pycbrf import ExchangeRates as ExchangeCBRF
 # import quandl

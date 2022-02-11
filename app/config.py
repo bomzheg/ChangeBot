@@ -53,7 +53,7 @@ DB_PORT = os.getenv("DB_PORT", 3306)
 DB_TYPE = os.getenv("DB_TYPE", "mysql")
 
 send_logs = True
-std_err_catch = True
+std_err_catch = False
 
 DEFAULT_VALS = ('USD', 'EUR', 'RUB')
 DEFAULT_SRC = 'oer'

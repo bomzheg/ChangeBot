@@ -2,7 +2,7 @@ from aiogram import types
 from loguru import logger
 from app import config
 from app.misc import dp, bot
-from exeptions import CurChangeError
+from app.utils.exeptions import CurChangeError
 
 
 @dp.errors_handler()
