@@ -4,7 +4,8 @@ from typing import Callable, Any, Awaitable
 from aiogram.types import TelegramObject
 
 from app.models.config.main import BotConfig
-from app.utils.exch_rates import RatesOpenExchange
+from app.services.rates.contrib.oer import RatesOpenExchange
+from app.services.rates.factory import ConvertedPricesFactory
 
 
 class ContextMiddleware(BaseMiddleware):
@@ -19,5 +20,5 @@ class ContextMiddleware(BaseMiddleware):
             data: dict[str, Any],
     ) -> Any:
         data["config"] = self.config
-        data["oer"] = self.oer
+        data["rates_factory"] = ConvertedPricesFactory(rates=self.oer)
         return await handler(event, data)

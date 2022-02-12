@@ -10,7 +10,7 @@ from app.config import load_config
 from app.handlers import setup_handlers
 from app.middlewares import setup_middlewares
 from app.models.db import create_pool
-from app.utils.exch_rates import RatesOpenExchange
+from app.services.rates.contrib.oer import RatesOpenExchange
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +31,7 @@ async def main():
     try:
         await dp.start_polling(bot)
     finally:
+        await bot.session.close()
         await oer.r.close()
         close_all_sessions()
 

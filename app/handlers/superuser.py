@@ -10,7 +10,7 @@ from functools import partial
 
 from app.filters.superusers import is_superuser
 from app.models.config.main import BotConfig
-from app.utils.exch_rates import RatesOpenExchange
+from app.services.rates.factory import ConvertedPricesFactory
 
 logger = logging.getLogger(__name__)
 
@@ -68,8 +68,8 @@ async def generate_logchat_link(message: Message, bot: Bot, config: BotConfig):
         )
 
 
-async def get_date(message: Message, oer: RatesOpenExchange):
-    await message.answer(await oer.get_updated_date(), disable_notification=True)
+async def get_date(message: Message, rates_factory: ConvertedPricesFactory):
+    await message.answer(await rates_factory.get_updated_date(), disable_notification=True)
 
 
 def setup_superuser(dp: Dispatcher, bot_config: BotConfig):

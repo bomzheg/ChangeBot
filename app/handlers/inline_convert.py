@@ -1,7 +1,7 @@
 from aiogram import Bot, Dispatcher
 from aiogram.types import InlineQuery, InlineQueryResultArticle, InputTextMessageContent
 
-from app.utils.exch_rates import ConvertedPrices, RatesOpenExchange
+from app.services.rates.factory import ConvertedPricesFactory
 
 VALUTA = {
     "RUB": "В рубли",
@@ -12,8 +12,8 @@ VALUTA = {
 }
 
 
-async def inline_convert(inline_query: InlineQuery, bot: Bot, oer: RatesOpenExchange):
-    line = ConvertedPrices(inline_query.query, rates=oer)
+async def inline_convert(inline_query: InlineQuery, bot: Bot, rates_factory: ConvertedPricesFactory):
+    line = rates_factory.build(inline_query.query)
     if line.get_count_prices() == 0:
         rez = [
             InlineQueryResultArticle(

@@ -6,17 +6,16 @@ from aiogram.types import ContentType, Message
 from app import texts
 from app.dao.holder import HolderDao
 from app.models import dto
+from app.services.rates.factory import ConvertedPricesFactory
 from app.services.settings import update_settings
-from app.utils.exch_rates import ConvertedPrices, RatesOpenExchange
 
 logger = logging.getLogger(__name__)
 
 
-async def settings_val(message: Message, settings: dto.Settings, dao: HolderDao, oer: RatesOpenExchange):
+async def settings_val(message: Message, settings: dto.Settings, dao: HolderDao, rates_factory: ConvertedPricesFactory):
     words = message.text.upper().split()
-    some_line = ConvertedPrices(rates=oer)
     if len(words) > 1:
-        to_append, err_list = some_line.validate_vals(words[1:])
+        to_append, err_list = rates_factory.validate_vals(words[1:])
         if len(err_list) > 0:
             await message.reply("Неизвестные валюты " + ", ".join(err_list), disable_notification=True)
         if len(to_append) > 0:
@@ -50,11 +49,11 @@ async def settings_src_oer(message: Message, settings: dto.Settings, dao: Holder
                         disable_notification=True)
 
 
-async def convert_valut(message: Message, settings: dto.Settings, oer: RatesOpenExchange):
+async def convert_valut(message: Message, settings: dto.Settings, rates_factory: ConvertedPricesFactory):
     text = message.text or message.caption
     if text is None:
         return
-    line = ConvertedPrices(text, rates=oer)
+    line = rates_factory.build(text)
     convert_text = await line.get_only_equals_rates(settings.vals)
     if convert_text != "":
         await message.reply(convert_text, disable_notification=True)

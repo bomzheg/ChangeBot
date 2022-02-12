@@ -10,7 +10,7 @@ from app import texts
 from app.dao.holder import HolderDao
 from app.models import dto
 from app.services.chat import update_chat_id
-from app.utils.exch_rates import ConvertedPrices, RatesOpenExchange
+from app.services.rates.factory import ConvertedPricesFactory
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ async def chat_migrate(message: Message, chat: dto.Chat, dao: HolderDao):
     logger.info(f"Migrate chat from %s to %s", message.chat.id, new_id)
 
 
-async def cmd_start_deep_link(message: Message, oer: RatesOpenExchange):
+async def cmd_start_deep_link(message: Message, rates_factory: ConvertedPricesFactory):
     """
         deep linking распознают строки вида:
         https://t.me/curChangeBot?start=from-1200RUB_1500RUBto-EUR_USD
@@ -65,7 +65,7 @@ async def cmd_start_deep_link(message: Message, oer: RatesOpenExchange):
     price = arg[start_price:end_price].split('_')
     vals_to = arg[end_price + 3:].split('_')
 
-    line = ConvertedPrices(" ".join(price), rates=oer)
+    line = rates_factory.build(" ".join(price))
     convert_text = await line.get_only_equals_rates(vals_to)
     if convert_text != "":
         await message.reply(convert_text, disable_notification=True)
