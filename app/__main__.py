@@ -10,7 +10,7 @@ from app.config import load_config
 from app.handlers import setup_handlers
 from app.middlewares import setup_middlewares
 from app.models.db import create_pool
-from app.services.rates.contrib.oer import RatesOpenExchange
+from app.services.rates import rates_holder_factory
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +21,8 @@ async def main():
 
     dp = Dispatcher()
     dp.message.bind_filter(ContentTypesFilter)
-    oer = RatesOpenExchange(config.rates.oer_token)
-    setup_middlewares(dp, create_pool(config.db), config.bot, oer)
+    rates_holder = rates_holder_factory(config.rates)
+    setup_middlewares(dp, create_pool(config.db), config.bot, rates_holder)
     setup_handlers(dp, config.bot)
 
     bot = Bot(config.bot.token, parse_mode="HTML")
@@ -32,7 +32,7 @@ async def main():
         await dp.start_polling(bot)
     finally:
         await bot.session.close()
-        await oer.r.close()
+        await rates_holder.close()
         close_all_sessions()
 
 

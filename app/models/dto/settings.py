@@ -1,8 +1,8 @@
 from __future__ import annotations
 from dataclasses import dataclass
 
-from app.config import DEFAULT_SRC
 from app.models import db
+from app.services.rates import RatesSource
 
 
 @dataclass
@@ -13,11 +13,15 @@ class Settings:
 
     @property
     def src(self):
-        return DEFAULT_SRC or self._src
+        return self._src
 
     @src.setter
     def src(self, src_: str):
         self._src = src_
+
+    @property
+    def source(self):
+        return RatesSource[self.src]
 
     @property
     def db_vals(self):

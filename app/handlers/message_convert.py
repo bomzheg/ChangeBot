@@ -53,7 +53,7 @@ async def convert_valut(message: Message, settings: dto.Settings, rates_factory:
     text = message.text or message.caption
     if text is None:
         return
-    line = rates_factory.build(text)
+    line = rates_factory.build(text, settings.source)
     convert_text = await line.get_only_equals_rates(settings.vals)
     if convert_text != "":
         await message.reply(convert_text, disable_notification=True)
