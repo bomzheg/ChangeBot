@@ -9,5 +9,3 @@ ujson
 
 pycbrf
 git+https://github.com/bomzheg/openexchangerates@master
-aiohttp-autoreload
-aiomysql

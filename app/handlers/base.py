@@ -1,6 +1,7 @@
 import logging
 
-from aiogram import Dispatcher
+import re
+from aiogram import Dispatcher, F
 from aiogram.dispatcher.filters.command import CommandStart
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove, ContentType
@@ -87,7 +88,10 @@ async def cmd_about(message: Message):
 
 
 def setup_base(dp: Dispatcher):
-    # dp.message.register(cmd_start_deep_link, CommandStart(commands=re.compile(r'^from-[\d\w_]*to-[\w_]*')))
+    dp.message.register(
+        cmd_start_deep_link,
+        CommandStart(command_magic=F.args.regexp(re.compile(r'^from-[\d\w_]*to-[\w_]*')))
+    )
     dp.message.register(cmd_start, CommandStart())
     dp.message.register(cmd_help, commands="help")
     dp.message.register(cmd_about, commands="about")
