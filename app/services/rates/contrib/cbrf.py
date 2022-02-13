@@ -17,7 +17,10 @@ class RatesCBRF(RatesProvider):
         if char_val == 'RUB':
             return 1
         else:
-            return float(self.r[char_val].rate)
+            try:
+                return float(self.r[char_val].rate)
+            except AttributeError as e:
+                raise KeyError from e
 
     def get_source_rates(self):
         return 'ЦБ РФ'
