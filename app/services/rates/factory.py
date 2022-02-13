@@ -142,7 +142,7 @@ class ConvertedPricesFactory:
         return to_append, err_list
 
     async def get_updated_date(self):
-        return f"oer: {await self.get_updated_date()}"
+        return await self.rates.get_updated_date()
 
 
 def add_prices(pattern: re.Pattern, line: str, val_char: IsoCode, positions_of_prices: list):

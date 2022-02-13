@@ -49,6 +49,12 @@ class RatesHolder:
         rez = price * rate_old_val_char / rate_new_val_char
         return rez, {old_src, new_src}
 
+    async def get_updated_date(self):
+        return "\n".join([
+            f"{code}: {await provider.get_updated_date()}"
+            for code, provider in self.providers_mapping.items()
+        ])
+
 
 def rates_holder_factory(config: RatesConfig) -> RatesHolder:
     return RatesHolder(providers_mapping={

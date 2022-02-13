@@ -20,8 +20,16 @@ async def handle(update: Update, exception: Exception, log_chat_id: int, bot: Bo
     await bot.send_message(
         log_chat_id,
         f"Получено исключение {exception.__class__.__name__}\n"
-        f"во время обработки апдейта {hd.quote(ujson.dumps(update.dict(exclude_none=True), default=str))}\n"
+        f"во время обработки апдейта {hd.quote(await serialize_update(update))}\n"
         f"{hd.quote(exception.args[0])}"
+    )
+
+
+async def serialize_update(update: Update) -> str:
+    return ujson.dumps(
+        update.dict(exclude_none=True),
+        ensure_ascii=False,
+        default=str,
     )
 
 

@@ -3,9 +3,10 @@ import threading
 import time
 import os
 
-from aiogram import Dispatcher, Bot
+from aiogram import Dispatcher, Bot, F
+from aiogram.dispatcher.filters import ContentTypesFilter
 from aiogram.exceptions import TelegramAPIError
-from aiogram.types import Message
+from aiogram.types import Message, ContentType
 from functools import partial
 
 from app.filters.superusers import is_superuser
@@ -80,8 +81,18 @@ def setup_superuser(dp: Dispatcher, bot_config: BotConfig):
     dp.message.register(leave_chat, is_superuser_, commands="get_out")
     dp.message.register(restart, is_superuser_, commands="restart")
 
-    dp.message.register(who_krasava, is_superuser_, lambda m: m.text.lower == "кто красавчик?")
-    dp.message.register(who_krasava, is_beauty_, lambda m: m.text.lower == "кто красотка?")
+    dp.message.register(
+        who_krasava,
+        is_superuser_,
+        ContentTypesFilter(content_types=ContentType.TEXT),
+        F.text.lower == "кто красавчик?",
+    )
+    dp.message.register(
+        who_krasava,
+        is_beauty_,
+        ContentTypesFilter(content_types=ContentType.TEXT),
+        F.text.lower == "кто красотка?",
+    )
 
     dp.message.register(get_logchat, is_superuser_, commands="logchat")
     dp.message.register(generate_logchat_link, is_superuser_, commands="generate_invite_logchat")
