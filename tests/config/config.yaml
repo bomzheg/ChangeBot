@@ -3,3 +3,5 @@ bot:
   log_chat: -1001234567890
   superusers:
     - 46866565
+rates:
+  oer_token: "my_api_key"
