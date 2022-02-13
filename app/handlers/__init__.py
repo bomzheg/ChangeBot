@@ -1,8 +1,21 @@
-from . import admin_bot
-from . import base
-from . import errors
-from . import info
-from . import message_convert
-from . import inline_convert
+import logging
 
-__all__ = [errors, admin_bot, base, info, message_convert, inline_convert]
+from aiogram import Dispatcher
+
+from app.handlers.base import setup_base
+from app.handlers.errors import setup_errors
+from app.handlers.inline_convert import setup_inline
+from app.handlers.message_convert import setup_message_convert
+from app.handlers.superuser import setup_superuser
+from app.models.config.main import BotConfig
+
+logger = logging.getLogger(__name__)
+
+
+def setup_handlers(dp: Dispatcher, bot_config: BotConfig):
+    setup_errors(dp, bot_config.log_chat)
+    setup_base(dp)
+    setup_superuser(dp, bot_config)
+    setup_message_convert(dp)
+    setup_inline(dp)
+    logger.debug("handlers configured successfully")
