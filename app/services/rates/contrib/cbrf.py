@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from pycbrf import ExchangeRates as ExchangeCBRF
 
 from app.services.rates.rates_provider import RatesProvider
@@ -10,10 +12,15 @@ class RatesCBRF(RatesProvider):
         super(RatesCBRF, self).__init__()
         self.r = ExchangeCBRF(locale_en=True)
 
-    async def get_updated_date(self):
+    async def get_updated_date(self) -> datetime:
         return self.r.date_received
 
-    async def get_rate(self, char_val: IsoCode):
+    async def get_rate(self, char_val: IsoCode) -> float:
+        if (await self.get_updated_date() - datetime.now()) > timedelta(days=3):
+            self.r = ExchangeCBRF(locale_en=True)
+        return await self.get_cached_rate(char_val)
+
+    async def get_cached_rate(self, char_val: IsoCode) -> float:
         if char_val == 'RUB':
             return 1
         else:
