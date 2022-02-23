@@ -35,7 +35,7 @@ async def restart(message: Message):
     threading.Thread(target=tread_stop, args=()).start()
 
 
-async def who_krasava(message):
+async def who_krasava(message: Message):
     await message.reply("Ты конечно!", disable_notification=True)
 
 
@@ -85,13 +85,13 @@ def setup_superuser(dp: Dispatcher, bot_config: BotConfig):
         who_krasava,
         is_superuser_,
         ContentTypesFilter(content_types=ContentType.TEXT),
-        F.text.lower == "кто красавчик?",
+        F.text.casefold() == "кто красавчик?",
     )
     dp.message.register(
         who_krasava,
         is_beauty_,
         ContentTypesFilter(content_types=ContentType.TEXT),
-        F.text.lower == "кто красотка?",
+        F.text.casefold() == "кто красотка?",
     )
 
     dp.message.register(get_logchat, is_superuser_, commands="logchat")
