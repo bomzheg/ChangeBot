@@ -28,9 +28,11 @@ async def main():
     bot = Bot(config.bot.token, parse_mode="HTML")
 
     logger.info("started")
+    await bot.send_message(config.bot.log_chat, "Bot started")
     try:
         await dp.start_polling(bot)
     finally:
+        await bot.send_message(config.bot.log_chat, "Bot stopped")
         await bot.session.close()
         await rates_holder.close()
         close_all_sessions()
