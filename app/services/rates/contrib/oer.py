@@ -25,7 +25,7 @@ class RatesOpenExchange(RatesProvider):
         return datetime.fromtimestamp(int(latest_['timestamp'])).isoformat()
 
     def get_source_rates(self):
-        return 'OpenExchangeRates'
+        return 'https://openexchangerates.org/'
 
     def get_source(self) -> RatesSource:
         return RatesSource.oer

@@ -2,8 +2,9 @@
 Danger! very old ugly code
 """
 import logging
-
 from dataclasses import dataclass, field
+
+from aiogram.utils.text_decorations import html_decoration as md
 
 from app.services.rates import RatesHolder, RatesSource
 from app.utils.types import IsoCode
@@ -52,7 +53,12 @@ class ConvertedPrice:
 
     @property
     def used_source_names(self):
-        return ' '.join(self.rates_holder.get_source_names(self.used_src))
+        return ', '.join(
+            map(
+                lambda x: f"[{md.link(x[0], x[1])}]",
+                enumerate(self.rates_holder.get_source_names(self.used_src), 1)
+            )
+        )
 
     def price_to_str(self, float_part: float, val_char_part: IsoCode):
         if val_char_part == "USD":
@@ -71,7 +77,7 @@ class ConvertedPrice:
             new_conv_price += self.price_to_str(new_price, val_char_to)
             if val_char_to != parts.val_char_part:
                 new_conv_price += f" (из {self.val_chars[parts.val_char_part]})"
-        new_conv_price += self.tail + "\nВсе конвертации по курсам: "
+        new_conv_price += self.tail + "\n\nПо курсам: "
         new_conv_price += self.used_source_names
         return new_conv_price
 
@@ -100,7 +106,7 @@ class ConvertedPrice:
                     if next_rez.find('≈') != -1:
                         rez += next_rez + "\n"
         if rez != '' and len(self.used_src) > 1:
-            rez += "Все конвертации по курсам: " + self.used_source_names
+            rez += "\nПо курсам: " + self.used_source_names
         return rez
 
     async def _new_price(self, price: float, old_val_char: IsoCode, new_val_char: IsoCode) -> float:

@@ -30,7 +30,7 @@ class RatesCBRF(RatesProvider):
                 raise KeyError from e
 
     def get_source_rates(self):
-        return 'ЦБ РФ'
+        return 'https://www.cbr.ru/'
 
     def get_source(self) -> RatesSource:
         return RatesSource.cbrf

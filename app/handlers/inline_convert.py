@@ -33,7 +33,9 @@ async def inline_convert(inline_query: InlineQuery, bot: Bot, rates_factory: Con
                     id=iso_code, title=desc,
                     description=f"Сконвертировано: {current}",
                     input_message_content=InputTextMessageContent(
-                        message_text=current)
+                        message_text=current,
+                        disable_web_page_preview=True,
+                    )
                 )
             )
     await bot.answer_inline_query(inline_query.id, results=rez)

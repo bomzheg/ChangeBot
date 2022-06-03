@@ -69,7 +69,7 @@ async def cmd_start_deep_link(message: Message, rates_factory: ConvertedPricesFa
     line = rates_factory.build(" ".join(price))
     convert_text = await line.get_only_equals_rates(vals_to)
     if convert_text != "":
-        await message.reply(convert_text, disable_notification=True)
+        await message.reply(convert_text, disable_notification=True, disable_web_page_preview=True)
     else:
         return await cmd_start(message)
 
