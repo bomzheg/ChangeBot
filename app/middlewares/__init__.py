@@ -19,4 +19,3 @@ def setup_middlewares(
     dp.inline_query.middleware(context_middleware)
     dp.message.middleware(DBMiddleware(pool))
     dp.message.middleware(LoadDataMiddleware())
-    dp.message.middleware()
