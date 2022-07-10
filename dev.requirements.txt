@@ -3,3 +3,5 @@
 pytest
 pytest-asyncio
 sqlalchemy2-stubs
+testcontainers[postgresql]
+pytest-ordering
