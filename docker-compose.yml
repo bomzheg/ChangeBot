@@ -8,12 +8,9 @@ services:
     image: bomzheg/change_bot
     volumes:
       - type: "bind"
-        source: "${HOME}/ChangeBot/log/"
-        target: "/log"
-      - type: "bind"
         source: "./config"
         target: "/config"
-    entrypoint: [ "python3", "-m", "app"]
+    entrypoint: [ "python3", "-m", "app", "-p"]
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
