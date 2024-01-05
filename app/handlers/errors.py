@@ -21,7 +21,7 @@ async def handle(update: Update, exception: Exception, log_chat_id: int, bot: Bo
         log_chat_id,
         f"Получено исключение {exception.__class__.__name__}\n"
         f"во время обработки апдейта {hd.quote(await serialize_update(update))}\n"
-        f"{hd.quote(exception.args[0])}"
+        f"{hd.quote(str(exception.args[0]))}"
     )
 
 
