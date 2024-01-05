@@ -15,6 +15,8 @@ services:
         target: "/config"
     env_file: config/.env
     entrypoint: [ "python3", "-m", "app"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - reverse-proxy
 
