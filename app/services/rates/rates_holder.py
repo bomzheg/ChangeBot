@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 
 from app.models.config.main import RatesConfig
-from app.services.rates.contrib import RatesCBRF, RatesOpenExchange
-from .rates_source import RatesSource
+from app.services.rates.contrib import RatesOpenExchange
 from app.services.rates.rates_provider import RatesProvider
 from app.utils.types import IsoCode
+from .rates_source import RatesSource
 
 
 @dataclass
@@ -58,6 +58,5 @@ class RatesHolder:
 
 def rates_holder_factory(config: RatesConfig) -> RatesHolder:
     return RatesHolder(providers_mapping={
-        RatesSource.cbrf: RatesCBRF(),
         RatesSource.oer: RatesOpenExchange(api_key=config.oer_token),
     })
